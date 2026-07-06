@@ -1,0 +1,139 @@
+import numpy as np, pandas as pd
+
+np.random.seed(42)
+
+n = 500
+
+hours_study = np.random.randint(1, 13, n)
+attendance = np.random.randint(40, 101, n)
+previous_marks = np.random.randint(30, 101, n)
+assignments_done = np.random.randint(0, 11, n)
+sleep_hours = np.random.randint(4, 11, n)
+
+# Weighted scoring formula
+score = (
+    hours_study * 3.5
+    + attendance * 0.3
+    + previous_marks * 0.4
+    + assignments_done * 2
+    - sleep_hours * 0.5
+)
+
+result = (score >= score.mean()).astype(int)  # 1=PASS, 0=FAIL
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+
+features = [
+    'Hours_Study',
+    'Attendance',
+    'Previous_Marks',
+    'Assignments_Done',
+    'Sleep_Hours'
+]
+
+X = df[features]
+y = df['Result']
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.20,
+    random_state=42,
+    stratify=y
+)
+
+scaler = StandardScaler()
+
+X_train_sc = scaler.fit_transform(X_train)
+X_test_sc = scaler.transform(X_test)
+
+model = LogisticRegression(
+    max_iter=1000,
+    solver='lbfgs',
+    random_state=42
+)
+
+model.fit(X_train_sc, y_train)
+def predict_student(hours, attendance, prev_marks, assignments, sleep):
+
+    inp = scaler.transform([
+        [hours, attendance, prev_marks, assignments, sleep]
+    ])
+
+    prediction = model.predict(inp)[0]      # 0 = FAIL, 1 = PASS
+    prob = model.predict_proba(inp)[0]      # [P_fail, P_pass]
+
+    label = 'PASS' if prediction == 1 else 'FAIL'
+    confidence = prob[prediction] * 100
+
+    return label, confidence, prob
+    import streamlit as st
+
+st.set_page_config(
+    page_title='Student Result Prediction',
+    page_icon='🎓',
+    layout='wide'
+)
+
+st.title('Student Result Prediction System')
+
+tab1, tab2, tab3 = st.tabs([
+    'Predict Result',
+    'Data Analysis',
+    'Model Performance'
+])
+
+with tab1:
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        hours = st.slider('Study Hours / Day', 1, 12, 6)
+        attendance = st.slider('Attendance (%)', 40, 100, 75)
+        prev_marks = st.slider('Previous Marks', 30, 100, 60)
+
+    with col2:
+        assignments = st.slider('Assignments Done', 0, 10, 5)
+        sleep = st.slider('Sleep Hours / Day', 4, 10, 7)
+
+    if st.button('Predict Result', type='primary'):
+        label, conf, _ = predict_student(
+            hours,
+            attendance,
+            prev_marks,
+            assignments,
+            sleep
+        )
+
+        color = 'green' if label == 'PASS' else 'red'
+
+        st.markdown(
+            f'## :{color}[{label}] Confidence: {conf:.1f}%'
+        )
+        from sklearn.metrics import (
+    accuracy_score,
+    precision_score,
+    recall_score,
+    f1_score,
+    confusion_matrix
+)
+
+y_pred = model.predict(X_test_sc)
+
+acc = accuracy_score(y_test, y_pred) * 100
+prec = precision_score(y_test, y_pred) * 100
+rec = recall_score(y_test, y_pred) * 100
+f1 = f1_score(y_test, y_pred) * 100
+# Step 1
+pip install streamlit scikit-learn pandas numpy matplotlib seaborn
+
+# Step 2
+cd path/to/your/project
+
+# Step 3
+python -m streamlit run Project.py
+
+# Step 4
+# Browser opens automatically at:
+http://localhost:8501
